@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensor Data - Smart Home Monitor</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Custom CSS */
+    .placeholder {
+      background-color: #bdf7aa;
+      color: #ff6600;
+      font-size: 1.2em;
+      text-align: center;
+      padding: 20px;
+      margin: 10px;
+      border-radius: 5px;
+      border: 1px solid #000000;
+    }
+
+    .datachart {
+      background-color: #bdf7aa;
+      color: #ff6600;
+      font-size: 1.2em;
+      text-align: center;
+      padding: 20px;
+      margin: 10px;
+      border-radius: 5px;
+      border: 1px solid #000000;
+    }
+
+    h1{
+      font-size: 2.5em;
+    }
+    h2 {
+      font-size: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="btn btn-light mb-3" onclick="window.location.href = 'index.html'">Home</button>
+    <h1 class="mb-4">Sensor Data</h1>
+    <h2>Real-Time Data</h2>
+    <div id="sensorData">
+      <!-- Sample Data Placeholders -->
+      <div class="placeholder">Temperature: --°C</div>
+      <div class="placeholder">Humidity: --%</div>
+      <div class="placeholder">Light Intensity: --</div>
+    </div>
+
+    <h2>Data Graph</h2>
+    <canvas id="dataChart" class="datachart"></canvas>
+  </div>
+
+  <script src="node_modules/chart.js/dist/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('dataChart').getContext('2d');
+    const dataChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Temperature (°C)',
+            data: [],
+            borderColor: 'red',
+            fill: false
+          },
+          {
+            label: 'Humidity (%)',
+            data: [],
+            borderColor: 'blue',
+            fill: false
+          },
+          {
+            label: 'Light Intensity',
+            data: [],
+            borderColor: 'yellow',
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'minute'
+            },
+            scaleLabel: {
+              display: true,
+              labelString: 'Time'
+            }
+          },
+          y: {
+            scaleLabel: {
+              display: true,
+              labelString: 'Value'
+            }
+          }
+        }
+      }
+    });
+
+
+    async function fetchData() {
+      const userId = localStorage.getItem('userId');
+
+      if (!userId) {
+        console.error('User ID not found');
+        return;
+      }
+
+      const data = await window.electronAPI.fetchData(userId);
+      const realTimeDataDiv = document.getElementById('sensorData');
+
+      if (data.length === 0) {
+        realTimeDataDiv.innerHTML = `<div class="placeholder">No data available.</div>`;
+      } else {
+        // Display real-time data
+        const latestEntry = data[data.length - 1];
+        realTimeDataDiv.innerHTML = `
+          <div>Temperature: ${latestEntry.temperature.toFixed(2)}°C</div>
+          <div>Humidity: ${latestEntry.humidity.toFixed(2)}%</div>
+          <div>Light Intensity: ${latestEntry.lightIntensity.toFixed(2)}</div>
+        `;
+
+        // Update chart
+        dataChart.data.labels = data.map(entry => new Date(entry.createdAt));
+        dataChart.data.datasets[0].data = data.map(entry => entry.temperature);
+        dataChart.data.datasets[1].data = data.map(entry => entry.humidity);
+        dataChart.data.datasets[2].data = data.map(entry => entry.lightIntensity);
+        dataChart.update();
+      }
+    }
+
+    // Fetch data every 5 seconds
+    setInterval(fetchData, 5000);
+    fetchData();
+  </script>
+
+  <!-- Bootstrap JS and dependencies (not needed for styling) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <!-- Chart.js -->
+  <script src="node_modules/chart.js/dist/chart.js"></script>
+  <script>
+    // JavaScript code goes here
+  </script>
+</body>
+</html>
+

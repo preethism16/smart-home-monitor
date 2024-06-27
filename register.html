@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Smart Home Monitor</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding-top: 50px;
+    }
+    .container {
+      max-width: 400px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .btn-custom {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center">Register</h1>
+    <div id="register">
+      <div class="form-group">
+        <input type="text" id="reg-username" class="form-control" placeholder="Username">
+      </div>
+      <div class="form-group">
+        <input type="password" id="reg-password" class="form-control" placeholder="Password">
+      </div>
+      <div class="form-group">
+        <input type="text" id="reg-mqtt-broker" class="form-control" placeholder="MQTT Broker Address">
+      </div>
+      <div id="register-message" class="text-center"></div>
+      <button class="btn btn-primary btn-block btn-custom" onclick="register()">Register</button>
+    </div>
+    
+    <h5 class="mt-4 mb-3 text-center">Already Have an account?</h5>
+    <button class="btn btn-secondary btn-block" onclick="window.location.href = 'login.html'">Login</button>
+    <button class="btn btn-light btn-block" onclick="window.location.href = 'index.html'">Home</button>
+  </div>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      window.electronAPI = require('electron').remote.getGlobal('electronAPI');
+    });
+  </script>
+  <script>
+    async function register() {
+      const username = document.getElementById('reg-username').value;
+      const password = document.getElementById('reg-password').value;
+      const mqttBroker = document.getElementById('reg-mqtt-broker').value;
+      try {
+        await window.electronAPI.register(username, password, mqttBroker);
+        document.getElementById('register-message').innerText = "Registration successful!";
+      } catch (error) {
+        document.getElementById('register-message').innerText = error.message;
+      }
+    }
+  </script>
+
+  <!-- Bootstrap JS and dependencies (not needed for styling) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
